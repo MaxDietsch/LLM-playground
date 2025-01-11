@@ -10,6 +10,7 @@ python = "^3.12"
 torch = {version = "^2.5.1", extras = ["cpu"]}
 pydantic = "^2.10.5"
 black = "^24.10.0"
+flake8-pyproject = "^1.2.3"
 
 
 [tool.poetry.group.dev.dependencies]
