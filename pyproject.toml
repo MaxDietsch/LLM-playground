@@ -1,4 +1,5 @@
 [tool.poetry]
+package-mode = false
 name = "llm-playground"
 version = "0.1.0"
 description = "Self-implemented transformers, maybe some training strategies. I will see. Get to know how transformers (and LLMs) work under the hood."
