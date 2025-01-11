@@ -1,9 +1,12 @@
 from torch import nn
+import torch
+from models.model.transformer_decoder import TransformerDecoderConfig
+
 
 class FeedFoward(nn.Module):
-    """ a simple linear layer followed by a non-linearity """
+    """a simple linear layer followed by a non-linearity"""
 
-    def __init__(self, config):
+    def __init__(self, config: TransformerDecoderConfig) -> None:
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(config.d_model, 4 * config.d_model),
@@ -12,5 +15,6 @@ class FeedFoward(nn.Module):
             nn.Dropout(config.dropout),
         )
 
-    def forward(self, x):
-        return self.net(x)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.net(x)
+        return x

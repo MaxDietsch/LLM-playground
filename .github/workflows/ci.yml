@@ -1,0 +1,40 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main  # or any branch you want to trigger the pipeline on
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Run on the latest Ubuntu environment
+    
+    steps:
+      # Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      # Set up Python (or other environment)
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12  
+      # Install Poetry
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          poetry install 
+        
+      # Run linting (e.g., with flake8 or pylint)
+      - name: Run linting
+        run: |
+          poetry run flake8 .  
+
+      # Optionally, you can also run type checking with mypy
+      - name: Run type check
+        run: |
+          poetry run mypy . 

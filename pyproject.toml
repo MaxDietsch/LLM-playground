@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "llm-playground"
+version = "0.1.0"
+description = "Self-implemented transformers, maybe some training strategies. I will see. Get to know how transformers (and LLMs) work under the hood."
+authors = ["Max Dietsch <diedietschies@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+torch = {version = "^2.5.1", extras = ["cpu"]}
+pydantic = "^2.10.5"
+black = "^24.10.0"
+
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.1"
+mypy = "^1.14.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.black]
+line-length = 100
+
+[tool.flake8]
+ignore = ["E501", "E203"]
+
+[tool.mypy]
+strict = true

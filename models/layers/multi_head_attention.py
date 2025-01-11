@@ -1,16 +1,21 @@
-from torch import nn 
-import torch  
+from torch import nn
+import torch
 from torch.nn import functional as F
 import math
 
-class MultiHeadAttention(nn.Module):
-    """ multiple heads of self-attention in parallel """
+from models.model.transformer_decoder import TransformerDecoderConfig
 
-    def __init__(self, config):
+
+class MultiHeadAttention(nn.Module):
+    """multiple heads of self-attention in parallel"""
+
+    def __init__(self, config: TransformerDecoderConfig) -> None:
         super().__init__()
 
         # Determine the number of key-value heads (defaults to num_heads if not specified)
-        self.num_kv_heads = config.num_kv_heads if config.num_kv_heads is not None else config.num_heads
+        self.num_kv_heads = (
+            config.num_kv_heads if config.num_kv_heads is not None else config.num_heads
+        )
 
         # Set the number of query heads and the number of repetitions for K and V
         self.num_heads_q = config.num_heads
@@ -26,12 +31,16 @@ class MultiHeadAttention(nn.Module):
         self.Wo = nn.Linear(config.num_heads * self.d_head, config.d_model, bias=False)
 
         # Initialize key and value caches with zeros
-        self.cache_k = torch.zeros((config.batch_size, config.context_length, self.num_kv_heads, self.d_head))
-        self.cache_v = torch.zeros((config.batch_size, config.context_length, self.num_kv_heads, self.d_head))
+        self.cache_k = torch.zeros(
+            (config.batch_size, config.context_length, self.num_kv_heads, self.d_head)
+        )
+        self.cache_v = torch.zeros(
+            (config.batch_size, config.context_length, self.num_kv_heads, self.d_head)
+        )
 
         # Rotary Position Embedding
-        #self.rope = RotaryPositionEmbedding(self.d_head, max_seq_len, device)
-    
+        # self.rope = RotaryPositionEmbedding(self.d_head, max_seq_len, device)
+
     @staticmethod
     def repeat_heads(x: torch.Tensor, num_rep: int) -> torch.Tensor:
         # Repeat the heads of K and V to match the number of heads in Q
@@ -39,12 +48,13 @@ class MultiHeadAttention(nn.Module):
         if num_rep == 1:
             return x
         else:
-            return (x[:, :, :, None, :]
-                    .expand(batch_size, seq_len, num_kv_heads, num_rep, head_dim)
-                    .reshape(batch_size, seq_len, num_kv_heads * num_rep, head_dim)
-                    )
+            return (
+                x[:, :, :, None, :]
+                .expand(batch_size, seq_len, num_kv_heads, num_rep, head_dim)
+                .reshape(batch_size, seq_len, num_kv_heads * num_rep, head_dim)
+            )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size, seq_len, dim = x.shape  # (B, T, dim)
 
         # (B, T, dim) -> (B, T, num_heads_q * d_head)
@@ -63,8 +73,8 @@ class MultiHeadAttention(nn.Module):
         xk = xk.view(batch_size, seq_len, self.num_kv_heads, self.d_head)
         xv = xv.view(batch_size, seq_len, self.num_kv_heads, self.d_head)
 
-        #xq = self.rope(xq, start_pos)
-        #xk = self.rope(xk, start_pos)
+        # xq = self.rope(xq, start_pos)
+        # xk = self.rope(xk, start_pos)
 
         # Repeat the heads of K and V to match the number of heads in Q
         keys = self.repeat_heads(xk, self.num_rep)
@@ -86,6 +96,6 @@ class MultiHeadAttention(nn.Module):
         context = context.transpose(1, 2).contiguous().view(batch_size, seq_len, -1)
 
         # (B, T, d_head) -> (B, T, dim)
-        output = self.Wo(context)
+        x = self.Wo(context)
 
-        return output
+        return x
