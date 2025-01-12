@@ -22,6 +22,6 @@ class PositionalEmbedding(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
-        batch_size, context_length = x.size()  # (B, T)
+        _, context_len = x.size()  # (B, T)
 
-        return self.encoding[:context_length, :]
+        return self.encoding[:context_len, :]

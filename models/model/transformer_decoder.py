@@ -7,21 +7,12 @@ from models.blocks.decoder_block import DecoderBlock
 from models.embedding.positional_embedding import PositionalEmbedding
 from models.embedding.token_embedding import TokenEmbedding
 
-from models.model.config import Config
+from models.model.config import TransformerDecoderConfig
+from models.model.model import AIModel
 
 
-class TransformerDecoderConfig(Config):
-    d_model: int
-    num_heads: int
-    context_length: int
-    batch_size: int
-    n_layer: int
-    dropout: float
-    vocab_size: int
-    num_kv_heads: Optional[int] = None
 
-
-class TransformerDecoder(nn.Module):
+class TransformerDecoder(AIModel):
 
     def __init__(self, config: TransformerDecoderConfig) -> None:
         super().__init__()

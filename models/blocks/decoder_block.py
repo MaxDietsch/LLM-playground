@@ -2,7 +2,8 @@ from torch import nn
 import torch
 from models.layers.feed_forward import FeedFoward
 from models.layers.multi_head_attention import MultiHeadAttention
-from models.model.transformer_decoder import TransformerDecoderConfig
+from models.model.config import TransformerDecoderConfig
+
 
 
 class DecoderBlock(nn.Module):

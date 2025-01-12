@@ -3,7 +3,8 @@ import torch
 from torch.nn import functional as F
 import math
 
-from models.model.transformer_decoder import TransformerDecoderConfig
+from models.model.config import TransformerDecoderConfig
+
 
 
 class MultiHeadAttention(nn.Module):

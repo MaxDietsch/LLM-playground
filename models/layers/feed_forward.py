@@ -1,6 +1,7 @@
 from torch import nn
 import torch
-from models.model.transformer_decoder import TransformerDecoderConfig
+
+from models.model.config import TransformerDecoderConfig
 
 
 class FeedFoward(nn.Module):
