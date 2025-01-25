@@ -49,6 +49,7 @@ model_config = TransformerDecoderConfig(
     n_layer=6,
     dropout=0.2,
     vocab_size=65,
+    apply_rope=True,
     num_kv_heads=None,
 )
 dataloader = SimpleTokenDataloader(

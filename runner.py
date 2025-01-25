@@ -1,21 +1,22 @@
 from typing import Literal
-from pydantic import BaseModel
 import torch
 from dataloader.dataloader import Dataloader
 from models.model.model import AIModel
 
 
-class Runner():
+class Runner:
 
-    def __init__(self, 
-                 dataloader: Dataloader, 
-                 model: AIModel, 
-                 optimizer: torch.optim.Optimizer, 
-                 device: Literal["cuda", "cpu"], 
-                 train_epochs: int = 10, 
-                 eval_interval: int = 1, 
-                 eval_iters: int = 10):
-       
+    def __init__(
+        self,
+        dataloader: Dataloader,
+        model: AIModel,
+        optimizer: torch.optim.Optimizer,
+        device: Literal["cuda", "cpu"],
+        train_epochs: int = 10,
+        eval_interval: int = 1,
+        eval_iters: int = 10,
+    ):
+
         self.dataloader = dataloader
         self.model = model
         self.optimizer = optimizer
@@ -24,7 +25,7 @@ class Runner():
         self.eval_interval = eval_interval
         self.eval_iters = eval_iters
 
-        self.model.to(self.device) 
+        self.model.to(self.device)
 
     def train(self) -> None:
         for epoch in range(self.train_epochs):

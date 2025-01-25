@@ -7,9 +7,9 @@ from models.blocks.decoder_block import DecoderBlock
 from models.embedding.positional_embedding import PositionalEmbedding
 from models.embedding.token_embedding import TokenEmbedding
 
+from models.layers.RMSNorm import RMSNorm
 from models.model.config import TransformerDecoderConfig
 from models.model.model import AIModel
-
 
 
 class TransformerDecoder(AIModel):
@@ -29,6 +29,7 @@ class TransformerDecoder(AIModel):
         self.blocks = nn.Sequential(*[DecoderBlock(config) for _ in range(self.n_layer)])
         self.ln_f = nn.LayerNorm(self.d_model)  # final layer norm
         self.lm_head = nn.Linear(self.d_model, self.vocab_size)
+        self.norm = RMSNorm(self.d_model)
 
         # better init, not covered in the original GPT video, but important, will cover in followup video
         self.apply(self._init_weights)
@@ -47,13 +48,14 @@ class TransformerDecoder(AIModel):
         B, T = x.shape
 
         # idx and targets are both (B,T) Tensor of integers
-        tok_emb = self.token_embedding(x)  # (B,T,C)
+        tok_emb = self.token_embedding(x)  # (B,T, d_model)
         pos_emb = self.position_embedding(
             x
         )  # self.position_embedding(torch.arange(T, device=device)) # (T,C)
-        x = tok_emb + pos_emb  # (B,T,C)
-        x = self.blocks(x)  # (B,T,C)
-        x = self.ln_f(x)  # (B,T,C)
+        x = tok_emb + pos_emb  # (B,T, d_model)
+        x = self.blocks(x)  # (B,T, d_model)
+        x = self.norm(x)
+        x = self.ln_f(x)  # (B,T, d_model)
         logits = self.lm_head(x)  # (B,T,vocab_size)
 
         if targets is None:
@@ -74,9 +76,9 @@ class TransformerDecoder(AIModel):
             # get the predictions
             logits, _ = self(x_cond)
             # focus only on the last time step
-            logits = logits[:, -1, :]  # becomes (B, C)
+            logits = logits[:, -1, :]  # becomes (B, vocab_size)
             # apply softmax to get probabilities
-            probs = F.softmax(logits, dim=-1)  # (B, C)
+            probs = F.softmax(logits, dim=-1)  # (B, vocab_size)
             # sample from the distribution
             x_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
             # append sampled index to the running sequence

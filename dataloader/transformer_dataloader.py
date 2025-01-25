@@ -5,16 +5,14 @@ import torch
 
 class SimpleTokenDataloader(Dataloader):
 
-    def __init__(self, 
-                 train_data: torch.Tensor, 
-                 val_data: torch.Tensor, 
-                 context_length: int, 
-                 batch_size: int):
-        super().__init__( 
-            train_data=train_data, 
-            val_data=val_data, 
-            context_length=context_length, 
-            batch_size=batch_size
+    def __init__(
+        self, train_data: torch.Tensor, val_data: torch.Tensor, context_length: int, batch_size: int
+    ):
+        super().__init__(
+            train_data=train_data,
+            val_data=val_data,
+            context_length=context_length,
+            batch_size=batch_size,
         )
 
     def get_batch(self, split: Literal["train", "val"]) -> tuple[torch.Tensor, torch.Tensor]:

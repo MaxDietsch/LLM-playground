@@ -14,4 +14,5 @@ class TransformerDecoderConfig(Config):
     n_layer: int
     dropout: float
     vocab_size: int
+    apply_rope: bool
     num_kv_heads: Optional[int] = None
