@@ -25,7 +25,7 @@ class TransformerDecoder(AIModel):
         self.num_heads = config.num_heads
         self.n_layer = config.n_layer
         self.token_embedding = TokenEmbedding(self.vocab_size, self.d_model)
-        self.position_embedding = PositionalEmbedding(self.context_length, self.d_model)
+        self.position_embedding = PositionalEmbedding(self.context_length, self.d_model, config.device)
         self.blocks = nn.Sequential(*[DecoderBlock(config) for _ in range(self.n_layer)])
         self.ln_f = nn.LayerNorm(self.d_model)  # final layer norm
         self.lm_head = nn.Linear(self.d_model, self.vocab_size)
@@ -33,6 +33,7 @@ class TransformerDecoder(AIModel):
 
         # better init, not covered in the original GPT video, but important, will cover in followup video
         self.apply(self._init_weights)
+        self.to(config.device)
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):

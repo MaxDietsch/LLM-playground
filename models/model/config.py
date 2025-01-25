@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import BaseModel
 
 
@@ -15,4 +15,5 @@ class TransformerDecoderConfig(Config):
     dropout: float
     vocab_size: int
     apply_rope: bool
+    device: Literal["cuda", "cpu"]
     num_kv_heads: Optional[int] = None

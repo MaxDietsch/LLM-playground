@@ -54,8 +54,9 @@ class Runner:
         for split in ["train", "val"]:
             losses = torch.zeros(self.eval_iters)
             for k in range(self.eval_iters):
-                X, Y = self.dataloader.get_batch(split)  # type: ignore[arg-type]
-                logits, loss = self.model(X, Y)
+                xb, yb = self.dataloader.get_batch(split)  # type: ignore[arg-type]
+                xb, yb = xb.to(self.device), yb.to(self.device)
+                logits, loss = self.model(xb, yb)
                 losses[k] = loss.item()
             out[split] = losses.mean()
         self.model.train()

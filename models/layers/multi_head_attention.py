@@ -1,3 +1,4 @@
+from typing import Literal
 from torch import nn
 import torch
 from torch.nn import functional as F
@@ -27,7 +28,9 @@ class MultiHeadAttention(nn.Module):
         # calculate freqs matrix for RoPE
         self.apply_rope = config.apply_rope
         if self.apply_rope:
-            self.freqs_complex = self.precompute_theta_pos_frequencies(config.context_length)
+            self.freqs_complex = self.precompute_theta_pos_frequencies(
+                config.context_length, config.device
+            )
 
         # Linear transformations for queries, keys, values, and output
         self.Wq = nn.Linear(config.d_model, config.num_heads * self.d_head, bias=False)
@@ -56,7 +59,9 @@ class MultiHeadAttention(nn.Module):
                 .reshape(batch_size, seq_len, num_kv_heads * num_rep, head_dim)
             )
 
-    def precompute_theta_pos_frequencies(self, context_length: int, theta: float = 10000.0):
+    def precompute_theta_pos_frequencies(
+        self, context_length: int, device: Literal["cuda", "cpu"], theta: float = 10000.0
+    ):
         assert self.d_head % 2 == 0, "Dimension must be divisible by 2 for applying RoPE"
 
         theta_numerator = torch.arange(0, self.d_head, 2).float()
@@ -68,7 +73,7 @@ class MultiHeadAttention(nn.Module):
         # (T, 1) * (q, d_head / 2) -> (T, d_head / 2)
         freqs = torch.outer(m, theta).float()
         # (T, d_head / 2)
-        freqs_complex = torch.polar(torch.ones_like(freqs), freqs)
+        freqs_complex = torch.polar(torch.ones_like(freqs), freqs).to(device)
         return freqs_complex
 
     def apply_RoPE(self, x: torch.Tensor):
