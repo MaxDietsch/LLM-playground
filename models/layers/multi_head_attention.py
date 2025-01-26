@@ -61,22 +61,22 @@ class MultiHeadAttention(nn.Module):
 
     def precompute_theta_pos_frequencies(
         self, context_length: int, device: Literal["cuda", "cpu"], theta: float = 10000.0
-    ):
+    ) -> torch.Tensor:
         assert self.d_head % 2 == 0, "Dimension must be divisible by 2 for applying RoPE"
 
         theta_numerator = torch.arange(0, self.d_head, 2).float()
 
         # (d_head / 2)
-        theta = 1.0 / (theta ** (theta_numerator / self.d_head))
+        theta_line = 1.0 / (theta ** (theta_numerator / self.d_head))
         # (T)
         m = torch.arange(context_length)
         # (T, 1) * (q, d_head / 2) -> (T, d_head / 2)
-        freqs = torch.outer(m, theta).float()
+        freqs = torch.outer(m, theta_line).float()
         # (T, d_head / 2)
         freqs_complex = torch.polar(torch.ones_like(freqs), freqs).to(device)
         return freqs_complex
 
-    def apply_RoPE(self, x: torch.Tensor):
+    def apply_RoPE(self, x: torch.Tensor) -> torch.Tensor:
 
         # (B, T, num_heads, d_head) -> (B, T, num_heads, d_head / 2)
         x_complex = torch.view_as_complex(x.float().reshape(*x.shape[:-1], -1, 2))

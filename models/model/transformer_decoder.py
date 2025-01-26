@@ -25,7 +25,9 @@ class TransformerDecoder(AIModel):
         self.num_heads = config.num_heads
         self.n_layer = config.n_layer
         self.token_embedding = TokenEmbedding(self.vocab_size, self.d_model)
-        self.position_embedding = PositionalEmbedding(self.context_length, self.d_model, config.device)
+        self.position_embedding = PositionalEmbedding(
+            self.context_length, self.d_model, config.device
+        )
         self.blocks = nn.Sequential(*[DecoderBlock(config) for _ in range(self.n_layer)])
         self.ln_f = nn.LayerNorm(self.d_model)  # final layer norm
         self.lm_head = nn.Linear(self.d_model, self.vocab_size)
@@ -47,7 +49,6 @@ class TransformerDecoder(AIModel):
         self, x: torch.Tensor, targets: Optional[torch.Tensor] = None
     ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
         B, T = x.shape
-
         # idx and targets are both (B,T) Tensor of integers
         tok_emb = self.token_embedding(x)  # (B,T, d_model)
         pos_emb = self.position_embedding(

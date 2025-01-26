@@ -1,8 +1,10 @@
 from typing import Literal
 from dataloader.transformer_dataloader import SimpleTokenDataloader
-from models.model.transformer_decoder import TransformerDecoder, TransformerDecoderConfig
+from models.model.transformer_decoder import TransformerDecoder
+from models.model.config import TransformerDecoderConfig
 import torch
 
+from models.tokenizer.vanilla_tokenizer import VanillaTokenizer
 from runner import Runner
 
 context_length = 256
@@ -21,21 +23,9 @@ with open("input.txt", "r", encoding="utf-8") as f:
 # here are all the unique characters that occur in this text
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
-# create a mapping from characters to integers
-stoi = {ch: i for i, ch in enumerate(chars)}
-itos = {i: ch for i, ch in enumerate(chars)}
-
-
-def encode(string: str) -> list[int]:
-    return [stoi[c] for c in string]  # encoder: take a string, output a list of integers
-
-
-def decode(token: list[int]) -> str:
-    return "".join([itos[i] for i in token])  # decoder: take a list of integers, output a string
-
 
 # Train and test splits
-data = torch.tensor(encode(text), dtype=torch.long)
+data = text
 n = int(0.9 * len(data))  # first 90% will be train, rest val
 train_data = data[:n]
 val_data = data[n:]
@@ -53,9 +43,10 @@ model_config = TransformerDecoderConfig(
     device=device,
     num_kv_heads=None,
 )
-dataloader = SimpleTokenDataloader(
-    train_data=train_data, val_data=val_data, context_length=context_length, batch_size=batch_size
-)
+dataloader = SimpleTokenDataloader(context_length=context_length, batch_size=batch_size)
+
+tokenizer = VanillaTokenizer(tokens=chars)
+
 model = TransformerDecoder(model_config)
 # print the number of parameters in the model
 print(sum(p.numel() for p in model.parameters()) / 1e6, "M parameters")
@@ -64,7 +55,10 @@ print(sum(p.numel() for p in model.parameters()) / 1e6, "M parameters")
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 runner = Runner(
+    train_data=train_data,
+    val_data=val_data,
     dataloader=dataloader,
+    tokenizer=tokenizer,
     model=model,
     optimizer=optimizer,
     device=device,

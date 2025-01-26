@@ -5,15 +5,17 @@ import torch
 
 class SimpleTokenDataloader(Dataloader):
 
-    def __init__(
-        self, train_data: torch.Tensor, val_data: torch.Tensor, context_length: int, batch_size: int
-    ):
+    def __init__(self, context_length: int, batch_size: int):
         super().__init__(
-            train_data=train_data,
-            val_data=val_data,
             context_length=context_length,
             batch_size=batch_size,
         )
+
+    def set_train_data(self, train_data: torch.Tensor) -> None:
+        self.train_data = train_data
+
+    def set_val_data(self, val_data: torch.Tensor) -> None:
+        self.val_data = val_data
 
     def get_batch(self, split: Literal["train", "val"]) -> tuple[torch.Tensor, torch.Tensor]:
         # generate a small batch of data of inputs x and targets y
